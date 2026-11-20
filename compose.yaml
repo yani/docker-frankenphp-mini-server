@@ -1,0 +1,45 @@
+services:
+  mini-server:
+    build: .
+    container_name: php-mini-server-tenant1
+    restart: unless-stopped
+    environment:
+      - FTP_USER=tenant1
+      - FTP_PASS=SuperSecretPassword123
+    # Pass DB/Redis connection details once attached to tenant1_net:
+    # - DB_HOST=tenant1-mariadb
+    # - REDIS_HOST=tenant1-redis
+    ports:
+      # Bound to 127.0.0.1 so localhost & your reverse proxy can reach it,
+      # without exposing port 12380 directly to the outside internet.
+      - "12380:80"
+      # FTP needs 0.0.0.0 (all interfaces) if tenants upload remotely:
+      - "12321:21"
+      - "21100-21110:21100-21110"
+    volumes:
+      - ./site-data:/var/www
+    networks:
+      - tenant1_net
+
+# ------------------------------------------------------------------
+# OPTIONAL: Uncomment to grant this tenant access to a DB or Redis.
+# Because both share 'tenant1_net', PHP can connect using the service
+# name (e.g. 'tenant1-mariadb') as the hostname.
+# ------------------------------------------------------------------
+# tenant1-mariadb:
+#   image: mariadb:11
+#   container_name: tenant1-mariadb
+#   restart: unless-stopped
+#   environment:
+#     - MARIADB_ROOT_PASSWORD=RootSecretPassword
+#     - MARIADB_DATABASE=tenant1_db
+#     - MARIADB_USER=tenant1
+#     - MARIADB_PASSWORD=DbPassword123
+#   volumes:
+#     - ./db_data:/var/lib/mysql
+#   networks:
+#     - tenant1_net
+
+networks:
+  tenant1_net:
+    driver: bridge
