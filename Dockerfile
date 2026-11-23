@@ -31,12 +31,18 @@ RUN echo "Docker Mini Server is running :)" > /var/www/public/index.html
 # chown the /var/www directory
 RUN chown -R www-data:www-data /var/www
 
+# Copy required configuration files
 COPY Caddyfile /etc/caddy/Caddyfile
 COPY vsftpd.conf /etc/vsftpd/vsftpd.conf
 COPY opcache.ini /usr/local/etc/php/conf.d/opcache.ini
+
+# Copy scripts
 COPY start.sh /start.sh
 RUN chmod +x /start.sh
+COPY healthcheck.sh /healthcheck.sh
+RUN chmod +x /healthcheck.sh
 
+# Expose the ports to be mapped
 EXPOSE 80 21 21100-21110
 
 CMD ["/start.sh"]

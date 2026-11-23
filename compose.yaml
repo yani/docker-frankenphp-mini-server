@@ -20,6 +20,12 @@ services:
       - ./site-data:/var/www
     networks:
       - tenant1_net
+    healthcheck:
+      test: ["CMD", "/healthcheck.sh"]
+      interval: 30s
+      timeout: 5s
+      retries: 3
+      start_period: 10s
 
 # ------------------------------------------------------------------
 # OPTIONAL: Uncomment to grant this tenant access to a DB or Redis.
